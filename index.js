@@ -42,6 +42,7 @@ async function run() {
                 bathRoom,
                 minPrice,
                 maxPrice,
+                availabilityStart
             } = req.query;
 
             let filter = {};
@@ -61,18 +62,39 @@ async function run() {
                     $lte: parseInt(maxPrice)
                 }
             }
-            if(capacity) {
+            if (capacity) {
                 filter.capacity = {
                     $gt: parseInt(capacity)
                 }
+            }
+            if (availabilityStart) {
+                const availabilityRegex = new RegExp(availabilityStart, 'i');
+                filter.availabilityStart = availabilityRegex;
             }
 
 
 
             const destinations = await DestinationCollection.find(filter).toArray();
             const count = destinations.length;
-            res.send({ destinations, count });
-        })
+            res.send({ destinations: destinations.slice(0, 20), count });
+        });
+
+        // app.get("/update", async (req, res) => {
+        //     const filter = {
+        //         price: {
+        //             $gt: 1000
+        //         }
+        //     }
+        //     const updatedDocument = {
+        //         $set: {
+        //             price: 650
+        //         }
+        //     }
+        //     const options = { upsert: true };
+
+        //     const result = await DestinationCollection.updateMany(filter, updatedDocument, options);
+        //     res.send(result);
+        // })
 
     } catch (error) {
         console.error(error);
